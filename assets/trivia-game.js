@@ -1,4 +1,5 @@
-var quizQuuestion = [
+
+var quizQuestion = [
     {
         question:"Which state is the birthplace of the Cheeseburger?",
         options: ["New York", "North Carolina", "Colorado"],
@@ -59,92 +60,112 @@ var quizQuuestion = [
         correct: "little water"
     }
 ];
+console.log(quizQuestion);
 
 
-var counter = 30;
-var currentQuestion = [];
+var counter = 15;
+var currentQuestion = 0;
 var score = 0;
 var loss = 0;
 var wins = 0;
 var timer;
+var options = quizQuestion.options;
 
-
-function timesUp(){
-    clearInterval(timer);
-    loss++;
-    nextQuestion();
-}
-
-function nextQuestion(){
-    var gameOver = (quizQuestions.length -1) === currentQuestion;
-    if (gameOver){
-        Results();
-    } else {
-        currentQuestion++; 
-        loadQuestion();
-    }
-}
-
-
-function countDown(){
-    counter --;
-    $("#time").html("Timer: " + counter);
-    if(counter === 0){
-        timesUp();
-    }
-}
 
 function loadQuestion(){
-    counter = 30;
+    counter = 5;
     timer = setInterval(countDown, 1000);
     var question = quizQuestion[currentQuestion].question;
-    var choices = quizQuestion[currentQuestion].options;
+    var options = quizQuestion[currentQuestion].options;
 
     
-    $("#time").html("Timer: " + counter);
-    $("#game").html(<h4>{question}</h4>
-        ${loadChoices(choices)};
+    $('#time').html('Timer: ' + counter);
+    $('#game').html(`
+        <h4>${question}</h4>
+        ${loadOptions(options)}
+    `);
 }
 loadQuestion();
 
-function loadChoice(){
-
+function loadOptions(options){
     var result = "";
-    for (var i = 0; i<choices.length; i++){
-        result = "<p> class="choice" data-answer= "${[choices[i]}">${[choices[i]}></p> ;
+
+    for(i=0; i < options.length; i++){
+        result += `<button class="option" data-answer="${options[i]}">${options[i]}</button>`;
     }
 
     return result;
+
 }
 
-//correct and incorrect guesses 
-$(document).on("click".choice, function(){
-    var userChoice = $(this).attr("data-answer");
+
+
+$(document).on("click", ".option", function(){
+    
+    var choiceAnswer = $(this).attr("data-answer");
     var correctAnswer = quizQuestion[currentQuestion].correct;
-    if(correctAnswer === userChoice){
-        score++;
-        nextQuestion();
+    console.log("click", choiceAnswer);
+    if (choiceAnswer === correctAnswer){
+        score ++
+        console.log("winner");
+        setTimeout(nextQuestion, 3 * 1000)
     } else {
-        loss++;
-        nextQuestion();
+        loss ++
+        console.log("loser");
+        setTimeout(nextQuestion, 3 * 1000)
     }
+    clearInterval(timer);
     
 })
 
-function Results(){
-    var result =
-    <p>Your Score ${score}</p>
+function nextQuestion(){
+    var isQuestionOver = (quizQuestion.length - 1) === currentQuestion;
+    if(isQuestionOver){
+        displayResult();
 
-    $(document).on("click", "#reset",function(){
-        counter = 30;
-        currentQuestion = 0;
-        score = 0;
-        timer = null;
-
-        loadQuestion();
-    })
-
+    }else{
+    currentQuestion ++;
+    loadQuestion();
+    }
+    
 }
 
+function displayResult(){
+    
+    var result = 
+    `<p> You got ${score} question(s)right</p>
+    <p> You missed ${loss} question(s)</p>
+    <button id="reset" class"btn btn-primary"> Play Again </button>
+    `;
+    $("#game").html(result) 
+}
 
+function countDown() {
+    counter--;
 
+    $('#time').html('Timer: ' + counter);
+
+    if (counter === 0) {
+        timeUp();
+    }
+}
+function timeUp() {
+    clearInterval(timer);
+
+    loss++;
+
+    nextQuestion();
+    preloadImage('lost');
+    setTimeout(nextQuestion, 3 * 1000);
+    
+} 
+
+function reset(){
+    $(document).on(`click`, `#reset`, function(){
+        currentQuestion = 0;
+        counter = 0; 
+        wins = 0;
+        loss =0
+    })
+}
+reset();
